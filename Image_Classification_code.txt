@@ -1,0 +1,81 @@
+Task 1
+
+Image classification using CNN:-
+
+#Image Classification using CNN - CIFAR-10 Dataset
+#Author: Himanshu Singh
+
+import tensorflow as tf
+from tensorflow.keras import datasets, layers, models
+import matplotlib.pyplot as plt
+import numpy as np
+
+#Load CIFAR-10 dataset
+(train_images, train_labels), (test_images, test_labels) = datasets.cifar10.load_data()
+
+#Normalize the pixel values
+train_images = train_images.astype("float32") / 255.0
+test_images = test_images.astype("float32") / 255.0
+
+#Class names
+class_names = ['Airplane', 'Automobile', 'Bird', 'Cat', 'Deer',
+               'Dog', 'Frog', 'Horse', 'Ship', 'Truck']
+
+#Display first 10 images with labels
+plt.figure(figsize=(10, 2))
+for i in range(10):
+    plt.subplot(1, 10, i+1)
+    plt.xticks([])
+    plt.yticks([])
+    plt.imshow(train_images[i])
+    plt.xlabel(class_names[int(train_labels[i])])
+plt.tight_layout()
+plt.show()
+
+#Build the CNN model
+model = models.Sequential([
+    layers.Conv2D(32, (3,3), activation='relu', input_shape=(32, 32, 3)),
+    layers.MaxPooling2D((2,2)),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.MaxPooling2D((2,2)),
+    layers.Conv2D(64, (3,3), activation='relu'),
+    layers.Flatten(),
+    layers.Dense(64, activation='relu'),
+    layers.Dense(10, activation='softmax')
+])
+
+#Compile the model
+model.compile(optimizer='adam',
+              loss='sparse_categorical_crossentropy',
+              metrics=['accuracy'])
+
+#Train the model
+history = model.fit(train_images, train_labels, epochs=10,
+                    validation_data=(test_images, test_labels),
+                    batch_size=64)
+
+#Evaluate the model
+test_loss, test_acc = model.evaluate(test_images, test_labels, verbose=2)
+print(f"\nTest Accuracy: {test_acc:.4f}")
+
+#Plot accuracy and loss
+plt.figure(figsize=(12, 4))
+
+plt.subplot(1, 2, 1)
+plt.plot(history.history['accuracy'], label='Train Acc')
+plt.plot(history.history['val_accuracy'], label='Val Acc')
+plt.title('Model Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+
+plt.subplot(1, 2, 2)
+plt.plot(history.history['loss'], label='Train Loss')
+plt.plot(history.history['val_loss'], label='Val Loss')
+plt.title('Model Loss')
+plt.xlabel('Epoch')
+plt.ylabel('Loss')
+plt.legend()
+
+plt.tight_layout()
+plt.show()
